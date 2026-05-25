@@ -18,6 +18,7 @@ node_modules/
 .cache/
 
 # Generated media and exports
+local-production/
 media/
 raw-media/
 exports/

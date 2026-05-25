@@ -6,7 +6,7 @@ param(
     [ValidateSet("Cybersecurity", "Business")]
     [string]$Channel,
 
-    [string]$Root = "C:\Users\paawa\Videos\YouTube-Production"
+    [string]$Root = "C:\Users\paawa\GitHub\YT-ai-automation-hub\local-production"
 )
 
 $ErrorActionPreference = "Stop"

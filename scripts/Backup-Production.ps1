@@ -1,5 +1,5 @@
 param(
-    [string]$Source = "C:\Users\paawa\Videos\YouTube-Production",
+    [string]$Source = "C:\Users\paawa\GitHub\YT-ai-automation-hub\local-production",
     [string]$Remote = "AI_Repo_DB:YouTube-Production"
 )
 
