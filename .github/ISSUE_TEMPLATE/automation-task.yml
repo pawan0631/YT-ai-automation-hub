@@ -1,0 +1,40 @@
+name: Automation Task
+description: Request a Codex/n8n/script/config automation improvement.
+title: "[Automation] "
+labels:
+  - automation
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What result should this automation produce?
+      placeholder: Describe the desired output and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Inputs
+      description: What files, APIs, credentials, or data sources are involved?
+  - type: textarea
+    id: output
+    attributes:
+      label: Expected Output
+      description: What should exist when the task is complete?
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: Budget, compliance, security, timing, or tool limits.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety Checks
+      options:
+        - label: No secrets will be committed.
+          required: true
+        - label: Human approval remains before publishing/uploading.
+          required: true
+        - label: Cybersecurity content remains educational/defensive.
+          required: false

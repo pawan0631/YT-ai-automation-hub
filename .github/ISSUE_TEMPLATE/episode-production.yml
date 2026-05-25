@@ -1,0 +1,40 @@
+name: Episode Production
+description: Track a long documentary and supporting shorts.
+title: "[Episode] "
+labels:
+  - episode
+body:
+  - type: input
+    id: channel
+    attributes:
+      label: Channel
+      placeholder: Cybersecurity or Business
+    validations:
+      required: true
+  - type: textarea
+    id: premise
+    attributes:
+      label: Premise
+      placeholder: What is the story and why will viewers care?
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Key Sources
+      placeholder: Add links or source notes.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Production Checklist
+      options:
+        - label: Topic scored.
+        - label: Research dossier complete.
+        - label: Script drafted.
+        - label: Fact-check complete.
+        - label: Voiceover complete.
+        - label: Thumbnail options complete.
+        - label: Long edit complete.
+        - label: Two shorts complete.
+        - label: Compliance review complete.
+        - label: Upload metadata complete.
