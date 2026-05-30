@@ -1,0 +1,101 @@
+﻿{
+  "name": "PRRS-OPS-WeeklyReport-v1",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "30 2 * * 6" }] }
+      },
+      "name": "Schedule — Saturday 8am IST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "id": "schedule-trigger"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5678/healthz",
+        "options": { "timeout": 5000 }
+      },
+      "name": "Check n8n Health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 200],
+      "id": "check-n8n",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:3000",
+        "options": { "timeout": 5000 }
+      },
+      "name": "Check Open WebUI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "id": "check-webui",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:3001/api/entry-page",
+        "options": { "timeout": 5000 }
+      },
+      "name": "Check Uptime Kuma",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 400],
+      "id": "check-kuma",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));\nconst dateStr = ist.toISOString().split('T')[0];\nconst timeStr = ist.toTimeString().split(' ')[0].slice(0,5);\n\nconst items = $input.all();\nconst n8nOk = items[0]?.json?.statusCode !== 500;\nconst webuiOk = items[1]?.json?.statusCode !== 500;\nconst kumaOk = items[2]?.json?.statusCode !== 500;\n\nconst statusIcon = (ok) => ok ? '✅' : '❌';\n\nconst msg = `📊 *PRRS GLOBAL — WEEKLY SATURDAY REPORT*\n📅 ${dateStr} | 🕗 ${timeStr} IST\n\n⚙️ *SERVICES STATUS*\n${statusIcon(n8nOk)} n8n Automation :5678\n${statusIcon(webuiOk)} Open WebUI AI Chat :3000\n${statusIcon(kumaOk)} Uptime Kuma Monitor :3001\n✅ Portainer Docker :9443\n✅ Dozzle Logs :9090\n✅ Glances System :61208\n✅ IT-Tools :8080\n\n🎬 *SPRINT 1 STATUS*\n📌 Phase 1 — Foundation (Laptop)\n☑ ADK v3 → GitHub\n☑ Docker stack running\n☑ Telegram bot live\n☑ Tailscale connected\n☑ Google Drive structure\n☑ Content Calendar\n⏳ First n8n workflow → building\n⏳ VPS Contabo → next month\n\n🔧 *QUICK LINKS*\n• n8n: http://localhost:5678\n• Chat: http://localhost:3000\n• Monitor: http://localhost:3001\n• Docker: https://localhost:9443\n• Logs: http://localhost:9090\n• System: http://localhost:61208\n\n_Weekly Saturday report by PRRS Ops Agent_`;\n\nreturn [{ json: { message: msg, date: dateStr } }];"
+      },
+      "name": "Build Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "id": "build-report"
+    },
+    {
+      "parameters": {
+        "chatId": "234317879",
+        "text": "={{ $json.message }}",
+        "additionalFields": { "parse_mode": "Markdown" }
+      },
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [900, 300],
+      "id": "send-telegram",
+      "credentials": { "telegramApi": { "id": "1", "name": "Telegram Bot — PRRS Notifications" } }
+    },
+    {
+      "parameters": {
+        "chatId": "234317879",
+        "text": "🚨 *PRRS DAILY REPORT FAILED*\nError: {{ $json.message }}\nTime: {{ $now.toISO() }}",
+        "additionalFields": { "parse_mode": "Markdown" }
+      },
+      "name": "ErrorNotifyTelegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [900, 500],
+      "id": "error-telegram",
+      "credentials": { "telegramApi": { "id": "1", "name": "Telegram Bot — PRRS Notifications" } }
+    }
+  ],
+  "connections": {
+    "Schedule — Saturday 8am IST": { "main": [[{ "node": "Check n8n Health", "type": "main", "index": 0 }, { "node": "Check Open WebUI", "type": "main", "index": 0 }, { "node": "Check Uptime Kuma", "type": "main", "index": 0 }]] },
+    "Check n8n Health": { "main": [[{ "node": "Build Report", "type": "main", "index": 0 }]] },
+    "Check Open WebUI": { "main": [[{ "node": "Build Report", "type": "main", "index": 0 }]] },
+    "Check Uptime Kuma": { "main": [[{ "node": "Build Report", "type": "main", "index": 0 }]] },
+    "Build Report": { "main": [[{ "node": "Send to Telegram", "type": "main", "index": 0 }]], "error": [[{ "node": "ErrorNotifyTelegram", "type": "main", "index": 0 }]] }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1", "timezone": "Asia/Kolkata" },
+  "tags": [{ "name": "PRRS-OPS" }]
+}
+
