@@ -1,4 +1,4 @@
-# Secrets
+﻿# Secrets
 .env
 .env.*
 !.env.example
@@ -46,3 +46,6 @@ zotero-storage/
 .DS_Store
 Thumbs.db
 .vscode/settings.json
+
+# Allow env template (safe to commit — no real values)
+!.env.template
