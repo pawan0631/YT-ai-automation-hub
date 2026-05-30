@@ -1,0 +1,117 @@
+﻿# docker-compose.yml — PRRS Global Enterprise
+# Node: [LAPTOP] Windows 11 — Central Command Center
+# Usage:
+#   Start all:    docker-compose up -d
+#   Stop all:     docker-compose down
+#   Restart one:  docker-compose restart n8n
+#   View logs:    docker-compose logs -f n8n
+#   Update image: docker-compose pull && docker-compose up -d
+# Updated: 2026-05-31
+
+version: "3.8"
+
+services:
+
+  # AUTOMATION ENGINE
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_HOST=localhost
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - TZ=Asia/Kolkata
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks: [prrs-local]
+
+  # LOCAL AI CHAT
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: always
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - WEBUI_SECRET_KEY=prrs-local-secret
+    volumes:
+      - open-webui:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [prrs-local]
+
+  # SERVICE HEALTH MONITOR
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime-kuma:/app/data
+    networks: [prrs-local]
+
+  # DOCKER MANAGER
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks: [prrs-local]
+
+  # CONTAINER LOG VIEWER
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: always
+    ports:
+      - "9090:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [prrs-local]
+
+  # SYSTEM HEALTH (CPU/RAM/DISK/NETWORK)
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
+    restart: always
+    ports:
+      - "61208:61208"
+    environment:
+      - GLANCES_OPT=-w
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    pid: host
+    networks: [prrs-local]
+
+  # IT UTILITIES (100+ dev tools)
+  it-tools:
+    image: corentinth/it-tools:latest
+    container_name: it-tools
+    restart: always
+    ports:
+      - "8080:80"
+    networks: [prrs-local]
+
+volumes:
+  n8n_data:
+    external: true
+  open-webui:
+    external: true
+  uptime-kuma:
+    external: true
+  portainer_data:
+    external: true
+
+networks:
+  prrs-local:
+    driver: bridge
